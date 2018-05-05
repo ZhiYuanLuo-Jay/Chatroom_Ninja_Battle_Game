@@ -1,0 +1,46 @@
+* {
+    /* outline: 1px dotted black; */
+    margin: 0px auto;
+    padding: 0px;
+}
+
+.wrapper {
+    width: 900px;
+    min-height: 600px;
+    padding: 5px;
+    background-color: beige;
+}
+
+#show {
+    display: inline-block;
+}
+
+.left {
+    margin: 10px 10px 0px 10px;
+    width: 600px;
+    height: 400px;
+    border: 5px solid lightblue;
+    display: inline-block;
+    overflow: auto;
+}
+
+.right {
+    margin-top: 10px;
+    width: 260px;
+    padding: 5px;
+    min-height: 200px;
+    border: 5px solid lightblue;
+    display: inline-block;
+    vertical-align: top;
+}
+
+#usr-area {
+    margin: 5px;
+    width: 880px;
+    height: 60px;
+    border: 5px solid lightblue;
+}
+
+#list {
+    margin-bottom: 5px;
+}

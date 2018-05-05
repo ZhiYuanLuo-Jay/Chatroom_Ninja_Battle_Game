@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Node Web Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+
+    <script>
+        $(document).ready(function() {
+            var socket = io(); //1
+            var username;
+            var pickTime = 0;
+            $("#usr").keypress(function(e) {
+                var key = e.which;
+                if (key == 13) {
+                    username = $('#usr').val();
+                    socket.emit('usr_button', {
+                        usr: username
+                    }); // init sending
+                }
+            })
+
+            $('#usrBtn').click(function() {
+                username = $('#usr').val();
+                socket.emit('usr_button', {
+                    usr: username
+                }); // init sending
+            });
+
+
+            $('#pickNinja').on("click", function() {
+                // console.log(usr_list);
+
+                socket.emit('find_button', {}); // init sending
+                socket.on('send_list', function(data) {
+                    // console.log(data.info); // list of updated ninjas
+                    strSelect = "<select name='list' id='list'>"
+                    for (var i = 0; i < data.info.length; i++) {
+                        // console.log(data.info[i].usr);
+                        strSelect += "<option value='" + data.info[i].usr + "'>" + data.info[i].usr + "</option>"
+                    }
+                    strSelect += "</select>";
+                    if (pickTime === 0) {
+                        $('#pickNinja').after(strSelect);
+                        pickTime = 1;
+                    }
+                });
+
+            });
+
+
+            $('button#enter').click(function() {
+                info = {
+                    name: username,
+                    skill: $("#skill").val(),
+                    item: $("#item").val(),
+                    comment: $("#comment").val(),
+                    ninja: $("#list").val()
+                }
+                console.log(info);
+
+                socket.emit('launch_button', {
+                    msg: info
+                }); // init sending
+
+                // console.log($("#list").val());
+                $('#list').remove();
+                $('#comment').val("");
+                pickTime = 0;
+                $('#' + info.ninja).attr("class", "btn btn btn-info btn-md")
+            });
+
+
+            socket.on('created_usr', function(data) { // receiving 
+                console.log(data.newUsr);
+                $('.container').append("<button class='btn btn-success btn-md' style='margin:10px;' id='" + data.newUsr.name + "'>" + data.newUsr.name + "</button>");
+                $('#usr').val("");
+                $('.left').append("<p>" + data.newUsr.name + " just quietly entered the chatroom .....................................</p>");
+            });
+
+            socket.on('updated_chat', function(data) { // receiving 
+                console.log(data.msg);
+                if (data.msg != "") {
+                    $('.left').append("<p style='color:blue;'>" + data.name + ' say: ' + data.msg + "</p>");
+                };
+                if (data.result != "") {
+                    $('.left').append("<p style='color:red;'>" + data.result + "</p>");
+                };
+            });
+
+            socket.on('turn_yellow', function(data) {
+                console.log(data.name);
+                $('#' + data.name).attr("class", "btn btn btn-warning btn-md")
+            })
+
+
+        })
+    </script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="input-group">
+            <button type="button" id="usrBtn" style="margin-left: 623px; display: inline-block; margin-top: 5px;">Start Here</button>
+            <input type="text" id="usr" style="margin-left: 10px; display: inline-block;" placeholder="Input Username">
+        </div>
+
+        <div class="container" id="usr-area">
+        </div>
+
+        <div>
+            <div class="left">
+            </div>
+
+            <div class="right">
+                <p>Ninja Skills:
+                    <select name="skill" id="skill">
+                        <option value="" selected></option>
+                        <option value="punch">Punch</option>
+                        <option value="kick">Kick</option>
+                        <option value="jump">Jump</option>
+                    </select>
+                </p>
+                <p>Backpack Items:
+                    <select name="item" id="item">
+                        <option value="" selected></option>
+                        <option value="remedy">Remedy</option>
+                        <option value="baloon">Baloon</option>
+                        <option value="timer">Timer</option>
+                    </select>
+                </p>
+
+                <p>Comment(Optional:)</p>
+                <textarea rows="5" cols="30" name="comment" id="comment"></textarea>
+                <button id="pickNinja" style="margin-right: 5px">Pick Ninja</button>
+                <button id="enter">Launch</button>
+                <br>
+                <br>
+                <input type='file' id="pic">
+
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
