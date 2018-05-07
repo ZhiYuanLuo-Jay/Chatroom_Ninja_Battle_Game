@@ -130,6 +130,13 @@ io.on('connection', function(socket) { //2
             if (obj_2.health <= 50) {
                 io.emit('turn_yellow', { name: obj_2.name });
             }
+            if (obj_2.health <= 20) {
+                io.emit('turn_red', { name: obj_2.name });
+            }
+            if (obj_2.health <= 0) {
+                io.emit('turn_grey', { name: obj_2.name });
+            }
+
         }
 
         if (obj_2 != null && data.msg.skill == "kick") {
@@ -140,6 +147,12 @@ io.on('connection', function(socket) { //2
             // console.log(obj_2.name);
             if (obj_2.health <= 50) {
                 io.emit('turn_yellow', { name: obj_2.name });
+            }
+            if (obj_2.health <= 20) {
+                io.emit('turn_red', { name: obj_2.name });
+            }
+            if (obj_2.health <= 0) {
+                io.emit('turn_grey', { name: obj_2.name });
             }
         }
 

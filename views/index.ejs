@@ -98,7 +98,17 @@
             socket.on('turn_yellow', function(data) {
                 console.log(data.name);
                 $('#' + data.name).attr("class", "btn btn btn-warning btn-md")
-            })
+            });
+
+            socket.on('turn_red', function(data) {
+                console.log(data.name);
+                $('#' + data.name).attr("class", "btn btn btn-danger btn-md")
+            });
+
+            socket.on('turn_grey', function(data) {
+                console.log(data.name);
+                $('#' + data.name).attr("class", "btn btn btn-dark btn-md")
+            });
 
 
         })
