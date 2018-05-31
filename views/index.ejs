@@ -4,14 +4,22 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Node Web Server</title>
+    <title>Ninja Chatroom Battle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script> -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
-
+    
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
     <script>
         $(document).ready(function() {
             var socket = io(); //1
@@ -70,16 +78,18 @@
                     msg: info
                 }); // init sending
 
-                // console.log($("#list").val());
-                $('#list').remove();
+                // console.log($("#list").val());  // name in select list
+                $('#list').remove();  // remove() method removes the selected element(s) and its child elements.
                 $('#comment').val("");
+                $('#skill').val("");
+                $('#item').val("");
                 pickTime = 0;
                 $('#' + info.ninja).attr("class", "btn btn btn-info btn-md")
             });
 
 
             socket.on('created_usr', function(data) { // receiving 
-                console.log(data.newUsr);
+                console.log("======>>", data.newUsr);
                 $('.container').append("<button class='btn btn-success btn-md' style='margin:10px;' id='" + data.newUsr.name + "'>" + data.newUsr.name + "</button>");
                 $('#usr').val("");
                 $('.left').append("<p>" + data.newUsr.name + " just quietly entered the chatroom .....................................</p>");
@@ -87,12 +97,28 @@
 
             socket.on('updated_chat', function(data) { // receiving 
                 console.log(data.msg);
+                console.log("=== Log ===", data.log);
+                var btmValue = $(document).height();
+                // console.log("Bottom Value:", btmValue);
+
                 if (data.msg != "") {
                     $('.left').append("<p style='color:blue;'>" + data.name + ' say: ' + data.msg + "</p>");
+                    $(".left").scrollTop(btmValue);
                 };
-                if (data.result != "") {
+                if (data.result != "" && data.treat == true) {
+                    $('.left').append("<p style='color:green;'>" + data.result + "</p>");
+                    $(".left").scrollTop(btmValue);
+                } 
+                else
+                {
                     $('.left').append("<p style='color:red;'>" + data.result + "</p>");
+                    $(".left").scrollTop(btmValue);
                 };
+            });
+
+            socket.on('turn_blue', function(data) {
+                console.log(data.name);
+                $('#' + data.name).attr("class", "btn btn btn-info btn-md")
             });
 
             socket.on('turn_yellow', function(data) {
@@ -116,7 +142,7 @@
 </head>
 
 <body>
-    <div class="wrapper">
+    <div class="wrapper" >
         <div class="input-group">
             <button type="button" id="usrBtn" style="margin-left: 623px; display: inline-block; margin-top: 5px;">Start Here</button>
             <input type="text" id="usr" style="margin-left: 10px; display: inline-block;" placeholder="Input Username">
@@ -147,13 +173,16 @@
                     </select>
                 </p>
 
-                <p>Comment(Optional:)</p>
+                <p>Message(Optional:)</p>
                 <textarea rows="5" cols="30" name="comment" id="comment"></textarea>
                 <button id="pickNinja" style="margin-right: 5px">Pick Ninja</button>
                 <button id="enter">Launch</button>
                 <br>
                 <br>
-                <input type='file' id="pic">
+                <input type="file" class="form-control-file" id="pic">
+                <br>
+                <img src="/images/2cars.jpg" alt="cars" height="150" width="235">
+                              
 
             </div>
         </div>

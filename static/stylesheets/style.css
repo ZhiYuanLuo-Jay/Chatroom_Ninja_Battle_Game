@@ -5,7 +5,7 @@
 }
 
 .wrapper {
-    width: 900px;
+    width: 950px;
     min-height: 600px;
     padding: 5px;
     background-color: beige;
@@ -16,29 +16,34 @@
 }
 
 .left {
-    margin: 10px 10px 0px 10px;
-    width: 600px;
+    margin: 10px 10px 0px 0px;
+    padding: 10px;
+    width: 660px;
     height: 450px;
     border: 5px solid lightblue;
     display: inline-block;
     overflow: auto;
+    border-radius: 10px;
 }
 
 .right {
     margin-top: 10px;
-    width: 260px;
-    padding: 5px;
-    min-height: 200px;
+    width: 265px;
+    padding: 10px;
+    min-height: 450px;
     border: 5px solid lightblue;
     display: inline-block;
     vertical-align: top;
+    border-radius: 10px;
 }
 
 #usr-area {
-    margin: 5px;
-    width: 880px;
+    margin: 5px 5px 5px 0px;
+    width: 940px;
     height: 60px;
     border: 5px solid lightblue;
+    overflow: auto;
+    border-radius: 10px;
 }
 
 #list {

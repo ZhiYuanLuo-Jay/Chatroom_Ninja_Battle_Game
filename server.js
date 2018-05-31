@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, "./static")));
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
 
+// setting up npm module
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -21,6 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 function Ninja(name) {
     this.name = name;
     this.health = 100;
+    this.items = 3;  // backpack items init
     var speed = 3;
     var strength = 3;
 
@@ -29,12 +31,15 @@ function Ninja(name) {
     }
 
     this.showStats = function() {
-        console.log("Name: " + this.name + ", Health: " + this.health +
+        console.log("Ninja Status -> Name: " + this.name + ", Health: " + this.health +
             ", Speed: " + speed + ", Strength: " + strength);
     }
 
     this.drinkSake = function() {
         this.health += 10;
+        if(this.health > 100){
+            this.health = 100;
+          }
         return this;
     }
 
@@ -44,6 +49,7 @@ function Ninja(name) {
 
 }
 
+// Ninja skill set
 Ninja.prototype.punch = function(nj) {
     // console.log(this);
     // console.log(nj);
@@ -52,6 +58,7 @@ Ninja.prototype.punch = function(nj) {
         this.name + ' and lost 5 Health! ');
     str_result = nj.name + ' was punched by ' +
         this.name + ' and lost 5 Health!';
+    chat_arr.push(str_result);
 };
 
 Ninja.prototype.kick = function(nj) {
@@ -63,6 +70,18 @@ Ninja.prototype.kick = function(nj) {
         ' and lost ' + this.readStrength() * 5 + ' Health!');
     str_result = nj.name + ' was kicked by ' + this.name +
         ' and lost ' + this.readStrength() * 5 + ' Health!';
+    chat_arr.push(str_result);
+};
+
+Ninja.prototype.remedy = function(nj) {
+    // console.log(nj);
+    // console.log(nj.health);
+    nj.health += 10;
+    console.log(nj.name + ' was treated by ' + this.name +
+        ' and increased 10 Health!');
+    str_result = nj.name + ' was treated by ' + this.name +
+        ' and increased 10 Health!';
+    chat_arr.push(str_result);
 };
 
 // using socket
@@ -71,10 +90,10 @@ const io = require('socket.io')(server);
 var counter = 0;
 var usr_list = [],
     obj_arr = [],
-    str_result = "";
+    str_result = "",
+    chat_arr = [];
 
 io.on('connection', function(socket) { //2
-    var chat_arr = [];
 
     // Part 1
     socket.on('usr_button', function(data) { // first receiving
@@ -104,9 +123,14 @@ io.on('connection', function(socket) { //2
     // Part 3
     socket.on('launch_button', function(data) { // first receiving
         console.log(data.msg.comment); //(note: this log will be on your server's terminal)
+        if (data.msg.comment){
+            // console.log("inserting comment to array");
+            chat_arr.push(data.msg.comment);
+        }
         var curUsr = data.msg.name;
         var oppUsr = data.msg.ninja;
         var obj_1, obj_2;
+        var is_treated = false;
 
         obj_arr.forEach(function(x) {
             // console.log(x['name']);
@@ -115,7 +139,7 @@ io.on('connection', function(socket) { //2
             };
             if (oppUsr == x['name']) {
                 obj_2 = x;
-            };
+            }; 
         })
 
         // console.log("obj_1: " + JSON.stringify(obj_1));
@@ -127,6 +151,9 @@ io.on('connection', function(socket) { //2
             obj_2.showStats();
             // console.log(obj_2.health);
             // console.log(obj_2.name);
+            if (obj_2.health > 50) {
+                io.emit('turn_blue', { name: obj_2.name });
+            }
             if (obj_2.health <= 50) {
                 io.emit('turn_yellow', { name: obj_2.name });
             }
@@ -136,11 +163,9 @@ io.on('connection', function(socket) { //2
             if (obj_2.health <= 0) {
                 io.emit('turn_grey', { name: obj_2.name });
             }
-
         }
 
         if (obj_2 != null && data.msg.skill == "kick") {
-            // obj_2.showStats();
             obj_1.kick(obj_2);
             obj_2.showStats();
             // console.log(obj_2.health);
@@ -156,13 +181,31 @@ io.on('connection', function(socket) { //2
             }
         }
 
-        chat_arr.push(data.msg);
-        // console.log(chat_arr);
+        if (obj_2 != null && data.msg.item == "remedy") {
+            obj_1.remedy(obj_2);
+            obj_2.showStats();
+            // console.log(obj_2.health);
+            // console.log(obj_2.name);
+            is_treated = true;
+            if (obj_2.health <= 50) {
+                io.emit('turn_yellow', { name: obj_2.name });
+            }
+            if (obj_2.health <= 20) {
+                io.emit('turn_red', { name: obj_2.name });
+            }
+            if (obj_2.health <= 0) {
+                io.emit('turn_grey', { name: obj_2.name });
+            }
+        }
+
+        console.log(chat_arr);
 
         io.emit('updated_chat', {
             name: data.msg['name'],
             msg: data.msg['comment'],
-            result: str_result
+            result: str_result,
+            log: chat_arr,
+            treat: is_treated,
         });
 
         // console.log(obj_arr);
