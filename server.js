@@ -1,11 +1,15 @@
 // require express
 var express = require("express");
+// create the express app
+var app = express();
+
+// require fileUpLoad
+const fileUpload = require('express-fileupload');
+// default options
+app.use(fileUpload());
 
 // path module -- try to figure out where and why we use this
 var path = require("path");
-
-// create the express app
-var app = express();
 
 // static content
 app.use(express.static(path.join(__dirname, "./static")));
@@ -92,14 +96,18 @@ var usr_list = [],
     obj_arr = [],
     str_result = "",
     chat_arr = []; 
+    usrObj = {};
 
 io.on('connection', function(socket) { //2
 
     // Part 1
     socket.on('usr_button', function(data) { // first receiving
-        usr_list.push({
-            usr: data.usr // get new username into array
-        });
+        usrObj = {
+            usr: data.usr, // get new username into array
+            imgNum: data.imgNum,
+        }
+
+        usr_list.push(usrObj);
 
         var newNinja = new Ninja(data.usr);
         // console.log(newNinja);
@@ -119,6 +127,11 @@ io.on('connection', function(socket) { //2
         socket.emit('send_list', { info: usr_list });
     });
 
+    // Part 2.1
+    socket.on('find_usr', function(data) { // first receiving
+        console.log(usr_list);
+        socket.emit('send_usr', { usr: usrObj });
+    });
 
     // Part 3
     socket.on('launch_button', function(data) { // first receiving
@@ -215,6 +228,27 @@ io.on('connection', function(socket) { //2
     });
 
 });
+
+app.post('/upload', function(req, res) {
+    // console.log("I am tring to upload a file.")
+    // console.log(req.body.picID);
+    imgName = req.body.picID;
+    if (!req.files){
+        return res.status(400).send('No files were uploaded.');
+    }
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    let sampleFile = req.files.sampleFile;
+    console.log("Sample file data: =>>>>> ", sampleFile);
+    // Use the mv() method to place the file somewhere on your server
+    // sampleFile.mv('/mean/chatroom_battle_game/static/images/'+ imgName + '.jpg', function(err) {
+    sampleFile.mv('/mean/chatroom_battle_game/static/images/foo.jpg', function(err) {
+      if (err){
+        return res.status(500).send(err);
+      }
+    //   res.send('File uploaded!');
+    res.redirect("/");
+    });
+  });
 
 // root route to render the index.ejs view
 app.get('/', function(req, res) {

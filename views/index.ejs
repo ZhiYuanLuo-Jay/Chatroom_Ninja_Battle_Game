@@ -25,6 +25,15 @@
             var socket = io(); //1
             var username = "";
             var pickTime = 0;
+            var imageRanNum;
+
+            socket.emit('find_usr', {}); // init sending
+            socket.on('send_usr', function(data) {
+                console.log(data);
+            });
+
+            // $('img').attr("src", "/images/" + imageRanNum + ".jpg")
+
             $("#usr").keypress(function(e) {
                 var key = e.which;
                 if (key == 13) {
@@ -32,8 +41,11 @@
                     if (username.length == 0) {
                         username = "Ninja-Anonymous";
                     }
+                    imageRanNum = Math.floor(Math.random(1, 100000000000) * 100000000000);
+                    console.log(imageRanNum);
                     socket.emit('usr_button', {
-                        usr: username
+                        usr: username,
+                        imgNum: imageRanNum,
                     }); // init sending
                 }
             })
@@ -43,11 +55,24 @@
                 if (username.length == 0) {
                         username = "Ninja-Anonymous";
                 }
+                imageRanNum = Math.floor(Math.random(1, 100000000000) * 100000000000);
+                console.log(imageRanNum);
                 socket.emit('usr_button', {
-                    usr: username
+                    usr: username,
+                    imgNum: imageRanNum,
                 }); // init sending
             });
+            
+            // It will change hidden value content
+            // $('#imgID').click(function() {
+            //     console.log(imageRanNum);
+            //     $('#picID').val(imageRanNum);
+            // });
 
+            // $('#upload').click(function() {
+            //     // src="/images/foo.jpg" 
+            //     $('img').attr("src", "/images/" + imageRanNum + ".jpg")
+            // });            
 
             $('#pickNinja').on("click", function() {
                 // console.log(usr_list);
@@ -66,7 +91,6 @@
                         pickTime = 1;
                     }
                 });
-
             });
 
 
@@ -93,7 +117,6 @@
                 $('#' + info.ninja).attr("class", "btn btn btn-info btn-md")
             });
 
-
             socket.on('created_usr', function(data) { // receiving 
                 console.log("======>>", data.newUsr);
                 $('#login').remove();
@@ -111,6 +134,7 @@
 
                 if (data.msg != "") {
                     $('.left').append("<p style='color:blue;'>" + data.name + ' say: ' + data.msg + "</p>");
+                    $('.left').append("<img src='/images/foo.jpg' alt='cars' height='150' width='235'>");
                     $(".left").scrollTop(btmValue);
                 };
                 if (data.result != "" && data.treat == true) {
@@ -190,10 +214,19 @@
                 <button id="enter">Launch</button>
                 <br>
                 <br>
-                <input type="file" class="form-control-file" id="pic">
+                <!-- <input type="file" class="form-control-file" id="pic"> -->
+
+                <form ref='uploadForm' 
+                    id='uploadForm' 
+                    action='http://localhost:1999/upload' 
+                    method='post' 
+                    encType="multipart/form-data">
+                    <input id="picID" name="picID" type="hidden" value="foo">
+                    <input type="file" name="sampleFile" id="imgID">
+                    <input type='submit' value='Upload' id="upload">
+                </form>
                 <br>
-                <img src="/images/2cars.jpg" alt="cars" height="150" width="235">
-                              
+                <img src="/images/foo.jpg" alt="cars" height="150" width="235">       
 
             </div>
         </div>
