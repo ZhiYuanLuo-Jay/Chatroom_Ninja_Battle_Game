@@ -23,12 +23,15 @@
     <script>
         $(document).ready(function() {
             var socket = io(); //1
-            var username;
+            var username = "";
             var pickTime = 0;
             $("#usr").keypress(function(e) {
                 var key = e.which;
                 if (key == 13) {
                     username = $('#usr').val();
+                    if (username.length == 0) {
+                        username = "Ninja-Anonymous";
+                    }
                     socket.emit('usr_button', {
                         usr: username
                     }); // init sending
@@ -37,6 +40,9 @@
 
             $('#usrBtn').click(function() {
                 username = $('#usr').val();
+                if (username.length == 0) {
+                        username = "Ninja-Anonymous";
+                }
                 socket.emit('usr_button', {
                     usr: username
                 }); // init sending
@@ -90,8 +96,10 @@
 
             socket.on('created_usr', function(data) { // receiving 
                 console.log("======>>", data.newUsr);
+                $('#login').remove();
+                $('.input-group').prepend("<button type='button' id='login' class='btn btn-info' style='width: 700; display: inline-block'>Logged in as " + data.newUsr.name + "</button>")
                 $('.container').append("<button class='btn btn-success btn-md' style='margin:10px;' id='" + data.newUsr.name + "'>" + data.newUsr.name + "</button>");
-                $('#usr').val("");
+                $('#usr').val("");                
                 $('.left').append("<p>" + data.newUsr.name + " just quietly entered the chatroom .....................................</p>");
             });
 
@@ -142,10 +150,13 @@
 </head>
 
 <body>
-    <div class="wrapper" >
+    <div class="wrapper">
         <div class="input-group">
-            <button type="button" id="usrBtn" style="margin-left: 623px; display: inline-block; margin-top: 5px;">Start Here</button>
-            <input type="text" id="usr" style="margin-left: 10px; display: inline-block;" placeholder="Input Username">
+            <div id="login" style="width: 700; display: inline-block"></div>
+            <div style="width: 700; display: inline-block">
+                <button type="button" id="usrBtn" style="margin-left: 10px; display: inline-block; margin-top: 5px; border-radius: 3px;">Start Here</button>
+                <input type="text" id="usr" style="margin-left: 10px; display: inline-block;" placeholder="Input Username">
+            </div>
         </div>
 
         <div class="container" id="usr-area">

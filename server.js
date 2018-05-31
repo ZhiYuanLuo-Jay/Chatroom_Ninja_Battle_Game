@@ -91,7 +91,7 @@ var counter = 0;
 var usr_list = [],
     obj_arr = [],
     str_result = "",
-    chat_arr = [];
+    chat_arr = []; 
 
 io.on('connection', function(socket) { //2
 
