@@ -118,6 +118,7 @@ io.on('connection', function(socket) { //2
 
         // console.log(usr_list); // list of users entered to the chatroom
         io.emit('created_usr', { newUsr: newNinja });
+        socket.emit('show_login', { newUsr: newNinja });
     });
 
 
@@ -129,8 +130,9 @@ io.on('connection', function(socket) { //2
 
     // Part 2.1
     socket.on('find_usr', function(data) { // first receiving
-        console.log(usr_list);
+        console.log(usrObj);
         socket.emit('send_usr', { usr: usrObj });
+        socket.emit('send_usrs', { usrs: usr_list, chat: chat_arr });
     });
 
     // Part 3
@@ -164,7 +166,7 @@ io.on('connection', function(socket) { //2
             obj_2.showStats();
             // console.log(obj_2.health);
             // console.log(obj_2.name);
-            if (obj_2.health > 50) {
+            if (obj_2.health > 50 && obj_2.health < 100) {
                 io.emit('turn_blue', { name: obj_2.name });
             }
             if (obj_2.health <= 50) {
@@ -183,6 +185,9 @@ io.on('connection', function(socket) { //2
             obj_2.showStats();
             // console.log(obj_2.health);
             // console.log(obj_2.name);
+            if (obj_2.health > 50 && obj_2.health < 100) {
+                io.emit('turn_blue', { name: obj_2.name });
+            }
             if (obj_2.health <= 50) {
                 io.emit('turn_yellow', { name: obj_2.name });
             }
@@ -200,6 +205,12 @@ io.on('connection', function(socket) { //2
             // console.log(obj_2.health);
             // console.log(obj_2.name);
             is_treated = true;
+            if (obj_2.health >= 100) {
+                io.emit('turn_green', { name: obj_2.name });
+            }
+            if (obj_2.health > 50 && obj_2.health < 100) {
+                io.emit('turn_blue', { name: obj_2.name });
+            }
             if (obj_2.health <= 50) {
                 io.emit('turn_yellow', { name: obj_2.name });
             }
@@ -238,10 +249,10 @@ app.post('/upload', function(req, res) {
     }
     // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
     let sampleFile = req.files.sampleFile;
-    console.log("Sample file data: =>>>>> ", sampleFile);
+    console.log("Uploaded file: =====> ", sampleFile);
     // Use the mv() method to place the file somewhere on your server
-    // sampleFile.mv('/mean/chatroom_battle_game/static/images/'+ imgName + '.jpg', function(err) {
-    sampleFile.mv('/mean/chatroom_battle_game/static/images/foo.jpg', function(err) {
+    sampleFile.mv('/mean/chatroom_battle_game/static/images/'+ imgName + '.jpg', function(err) {
+    // sampleFile.mv('/mean/chatroom_battle_game/static/images/foo.jpg', function(err) {
       if (err){
         return res.status(500).send(err);
       }

@@ -27,12 +27,49 @@
             var pickTime = 0;
             var imageRanNum;
 
-            socket.emit('find_usr', {}); // init sending
-            socket.on('send_usr', function(data) {
-                console.log(data);
+            $("img").on('error', function(){
+                console.log("this :",this);
+                // $(this).attr('src', "something.png") 
             });
 
-            // $('img').attr("src", "/images/" + imageRanNum + ".jpg")
+            socket.emit('find_usr', {}); // init sending
+            socket.on('send_usr', function(data) {
+                console.log(data.usr.imgNum);
+                // console.log($('img').attr('src'));
+
+                if (data.usr.imgNum !== undefined){
+                    $('img').attr("src", "/images/" + data.usr.imgNum + ".jpg");
+
+                    console.log($('img').attr('src'));
+
+                    $('#login').remove();
+                    $('.input-group').prepend("<button type='button' id='login' class='btn btn-info' style='width: 700; display: inline-block'>Logged in as " + data.usr.usr + "</button>");
+                    username = data.usr.usr;
+
+                } else {
+                    $('img').attr("src", "/images/foo.jpg")
+                }
+            });
+
+            socket.on('send_usrs', function(data) {
+                console.log("user_list", data.usrs);
+                console.log("chat_arr", data.chat);
+                if (data.usrs.length !== 0){
+                    for (const usr of data.usrs) {
+                        // console.log(usr.usr);
+                        $('.container').append("<button class='btn btn-success btn-md' style='margin:10px;' id='" + usr.usr + "'>" + usr.usr + "</button>");
+                    }
+                };
+
+                if (data.chat.length !== 0){
+                    for (const c of data.chat) {
+                        console.log(c);
+                        $('.left').append("<p style='color:lightpurple;'>" + c + "</p>");
+                    }
+                }
+
+            })
+                      
 
             $("#usr").keypress(function(e) {
                 var key = e.which;
@@ -64,15 +101,15 @@
             });
             
             // It will change hidden value content
-            // $('#imgID').click(function() {
-            //     console.log(imageRanNum);
-            //     $('#picID').val(imageRanNum);
-            // });
+            $('#imgID').click(function() {
+                console.log(imageRanNum);
+                $('#picID').val(imageRanNum);
+            });
 
-            // $('#upload').click(function() {
-            //     // src="/images/foo.jpg" 
-            //     $('img').attr("src", "/images/" + imageRanNum + ".jpg")
-            // });            
+            $('#upload').click(function() {
+                // src="/images/foo.jpg" 
+                $('img').attr("src", "/images/" + imageRanNum + ".jpg")
+            });            
 
             $('#pickNinja').on("click", function() {
                 // console.log(usr_list);
@@ -99,7 +136,7 @@
                     name: username,
                     skill: $("#skill").val(),
                     item: $("#item").val(),
-                    comment: $("#comment").val(),
+                    comment: `:${username}:~ ` + $("#comment").val(),
                     ninja: $("#list").val()
                 }
                 console.log(info);
@@ -119,12 +156,18 @@
 
             socket.on('created_usr', function(data) { // receiving 
                 console.log("======>>", data.newUsr);
-                $('#login').remove();
-                $('.input-group').prepend("<button type='button' id='login' class='btn btn-info' style='width: 700; display: inline-block'>Logged in as " + data.newUsr.name + "</button>")
+                // $('#login').remove();
+                // $('.input-group').prepend("<button type='button' id='login' class='btn btn-info' style='width: 700; display: inline-block'>Logged in as " + data.newUsr.name + "</button>")
                 $('.container').append("<button class='btn btn-success btn-md' style='margin:10px;' id='" + data.newUsr.name + "'>" + data.newUsr.name + "</button>");
                 $('#usr').val("");                
                 $('.left').append("<p>" + data.newUsr.name + " just quietly entered the chatroom .....................................</p>");
             });
+
+            socket.on('show_login', function(data) { // receiving 
+                $('#login').remove();
+                $('.input-group').prepend("<button type='button' id='login' class='btn btn-info' style='width: 700; display: inline-block'>Logged in as " + data.newUsr.name + "</button>")
+            });
+
 
             socket.on('updated_chat', function(data) { // receiving 
                 console.log(data.msg);
@@ -133,8 +176,8 @@
                 // console.log("Bottom Value:", btmValue);
 
                 if (data.msg != "") {
-                    $('.left').append("<p style='color:blue;'>" + data.name + ' say: ' + data.msg + "</p>");
-                    $('.left').append("<img src='/images/foo.jpg' alt='cars' height='150' width='235'>");
+                    $('.left').append("<p style='color:blue;'>" + data.msg + "</p>");
+                    // $('.left').append("<img src='/images/foo.jpg' alt='cars' height='150' width='235'>");
                     $(".left").scrollTop(btmValue);
                 };
                 if (data.result != "" && data.treat == true) {
@@ -148,24 +191,29 @@
                 };
             });
 
+            socket.on('turn_green', function(data) {
+                console.log("try to turn green ================");
+                $('#' + data.name).attr("class", "btn btn-success btn-md")
+            });
+
             socket.on('turn_blue', function(data) {
-                console.log(data.name);
-                $('#' + data.name).attr("class", "btn btn btn-info btn-md")
+                console.log("try to turn blue ================");
+                $('#' + data.name).attr("class", "btn btn-info btn-md")
             });
 
             socket.on('turn_yellow', function(data) {
                 console.log(data.name);
-                $('#' + data.name).attr("class", "btn btn btn-warning btn-md")
+                $('#' + data.name).attr("class", "btn btn-warning btn-md")
             });
 
             socket.on('turn_red', function(data) {
                 console.log(data.name);
-                $('#' + data.name).attr("class", "btn btn btn-danger btn-md")
+                $('#' + data.name).attr("class", "btn btn-danger btn-md")
             });
 
             socket.on('turn_grey', function(data) {
                 console.log(data.name);
-                $('#' + data.name).attr("class", "btn btn btn-dark btn-md")
+                $('#' + data.name).attr("class", "btn btn-dark btn-md")
             });
 
 
@@ -226,7 +274,7 @@
                     <input type='submit' value='Upload' id="upload">
                 </form>
                 <br>
-                <img src="/images/foo.jpg" alt="cars" height="150" width="235">       
+                <img id="disp" src="/images/foo.jpg" alt="Template Image" height="150" width="235">       
 
             </div>
         </div>
